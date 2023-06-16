@@ -10,11 +10,12 @@ import {
 } from "@mui/material";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { getMultipleImageDataURL } from "../services/UploadService";
+import { getMultipleImageDataURL, uploadMultipleProductImage } from "../services/UploadService";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { generateUUID } from "../utils/generator";
 import { CAR_BRAND, PART } from "../constant/productsList";
 import { CustomAutoCompleteField } from "./customAutoComplete";
+import { addProduct } from "../services/ProductService";
 
 interface ImageSet {
   src: string;
@@ -29,9 +30,19 @@ const ProductForm = () => {
     control,
   } = useForm();
 
-  const onSubmit = useCallback((e) => {
-    console.debug(e);
-  }, []);
+  const onSubmit = useCallback(
+    async (e) => {
+      const imagesUrl = await uploadMultipleProductImage(
+        images.map((data) => data.src)
+      );
+      const payload = {
+        ...e,
+        images: imagesUrl,
+      };
+      await addProduct(payload);
+    },
+    [images]
+  );
 
   const handleUploadLocalImages = useCallback(async (event: Event) => {
     event.preventDefault();
@@ -217,7 +228,9 @@ const ProductForm = () => {
           />
         </Grid>
       </Grid>
-      <Button variant="outlined" type="submit">SUBMIT</Button>
+      <Button variant="outlined" type="submit">
+        SUBMIT
+      </Button>
     </form>
   );
 };
