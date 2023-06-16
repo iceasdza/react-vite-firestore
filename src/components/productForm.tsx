@@ -1,4 +1,6 @@
 import {
+  Autocomplete,
+  Button,
   Grid,
   IconButton,
   ImageList,
@@ -11,6 +13,8 @@ import { Controller, useForm } from "react-hook-form";
 import { getMultipleImageDataURL } from "../services/UploadService";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { generateUUID } from "../utils/generator";
+import { CAR_BRAND, PART } from "../constant/productsList";
+import { CustomAutoCompleteField } from "./customAutoComplete";
 
 interface ImageSet {
   src: string;
@@ -30,6 +34,7 @@ const ProductForm = () => {
   }, []);
 
   const handleUploadLocalImages = useCallback(async (event: Event) => {
+    event.preventDefault();
     const target = event.target as HTMLInputElement;
     const files = target.files;
     const dataList: Array<ImageSet> = (
@@ -96,13 +101,7 @@ const ProductForm = () => {
         <Grid item xs={12}>
           <Controller
             control={control}
-            name="description"
-            rules={{
-              required: {
-                value: true,
-                message: "Please input product description!",
-              },
-            }}
+            name="images"
             render={({ field }) => (
               <input
                 {...field}
@@ -115,7 +114,7 @@ const ProductForm = () => {
         </Grid>
         <Grid item xs={12}>
           <ImageList
-            sx={{ width: "100%", height: 450 }}
+            sx={{ width: "100%", height: 300 }}
             cols={3}
             rowHeight={164}
           >
@@ -148,7 +147,77 @@ const ProductForm = () => {
             ))}
           </ImageList>
         </Grid>
+        <Grid item xs={6}>
+          <Controller
+            control={control}
+            name="price"
+            rules={{
+              min: {
+                message: "Please input more than 0",
+                value: 0,
+              },
+              required: {
+                value: true,
+                message: "Please input product price!",
+              },
+            }}
+            render={({ field }) => (
+              <TextField
+                type="number"
+                fullWidth
+                label="Product price"
+                {...field}
+                error={!!errors.price}
+                helperText={`${errors?.price?.message || ""}`}
+              />
+            )}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <Controller
+            control={control}
+            name="quantityInPack"
+            rules={{
+              min: {
+                message: "Please input more than 0",
+                value: 0,
+              },
+              required: {
+                value: true,
+                message: "Please input product quantity per pack!",
+              },
+            }}
+            render={({ field }) => (
+              <TextField
+                defaultValue={1}
+                fullWidth
+                label="Product quantityInPack"
+                {...field}
+                error={!!errors.quantityInPack}
+                helperText={`${errors?.quantityInPack?.message || ""}`}
+                minRows={4}
+              />
+            )}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <CustomAutoCompleteField
+            options={CAR_BRAND}
+            control={control}
+            name="carModel"
+            placeholder="Car Model"
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <CustomAutoCompleteField
+            options={PART}
+            control={control}
+            name="partName"
+            placeholder="Car part"
+          />
+        </Grid>
       </Grid>
+      <Button variant="outlined" type="submit">SUBMIT</Button>
     </form>
   );
 };
